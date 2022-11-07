@@ -4,7 +4,7 @@ from torch import nn
 h1=128
 h2=64
 h3=16
-h4=1
+h4=2
 dim=3
 
 class encoder(nn.Module):
@@ -15,7 +15,7 @@ class encoder(nn.Module):
             nn.Linear(h1, h2),
             nn.ReLU(True),
             nn.Linear(h2, h3),
-            nn.ReLU(True), nn.Linear(h3,1))
+            nn.ReLU(True), nn.Linear(h3,h4))
 
     def forward(self, x):
         x = self.encoder(x)
@@ -25,8 +25,6 @@ class decoder(nn.Module):
     def __init__(self):
         super(decoder, self).__init__()
         self.decoder = nn.Sequential(
-            nn.Linear(1, h4),
-            nn.ReLU(True),
             nn.Linear(h4, h3),
             nn.ReLU(True),
             nn.Linear(h3, h2),

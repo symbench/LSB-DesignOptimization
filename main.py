@@ -16,12 +16,12 @@ import shutil
 
 from en_dec import *
 
-a_l=50; a_h=100;
-b_l=20; b_h=40;
-c_l=5; c_h=30;
+a_l=100; a_h=500;
+b_l=70; b_h=300;
+c_l=70; c_h=300;
 #r_l=100; r_h=750;
 #v_l=0.5;v_h=5;
-n=100
+n=20000
 dim=3
 ranges=[a_l,a_h,b_l,b_h,c_l,c_h]             
 
@@ -31,9 +31,9 @@ input_size=dim
 output_size=dim                          
 
 
-max_epoch = 100
+max_epoch = 500
 at_least_epoch=25
-batch_size = 4
+batch_size=64
 device='cuda'
 loss_fn=nn.L1Loss()
 num_co=[]

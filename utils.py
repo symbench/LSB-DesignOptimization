@@ -55,41 +55,6 @@ def initialize_weights(m):
 
 
 
-
-
-
-def scale_data(data, ranges):
-    minimum = []
-    total_range = []
-    for i in range(data.shape[1]):
-        minimum.append(ranges[2 * i])
-        total_range.append((ranges[2 * i + 1] - ranges[2 * i]))
-    # print('min is:',minimum,'Range is:',total_range,'data b/f scaling is:',data)
-    minimum = np.array(minimum).reshape(1, -1)
-    total_range = np.array(total_range).reshape(1, -1)
-    data = np.divide((data - minimum), total_range)
-    # print('min is:',minimum,'Range is:',total_range,'data a/f scaling is:',data)
-    return data
-
-
-def rescale_data(data, ranges, mask):
-    # print('data b/f rescaling:',data)
-    for i in range(len(mask)):
-        # print('i is:',i,'mask is:',mask[i])
-
-        if mask[i] == "real":
-            data[:, i] = (data[:, i] * (ranges[2 * i + 1] - ranges[2 * i])) + ranges[
-                2 * i
-            ]
-        elif mask[i] == "int":
-            data[:, i] = (data[:, i] * (ranges[2 * i + 1] - ranges[2 * i])) + ranges[
-                2 * i
-            ]
-            data[:, i] = np.array(data[:, i], dtype=np.int16)
-    # print('data after rescaling:',data)
-    return data
-
-
 # on a given input prepare data for training
 def data_preperation(data, ranges):
     for i in range(int(len(ranges)/2)):
@@ -183,6 +148,12 @@ class SimDataset(torch.utils.data.Dataset):
 
 def gen_test_data(n,dim,ranges):
     data= np.random.random((n,dim))
+    for i in range(int(len(ranges)/2)):
+       data[:, i] = (data[:, i] * (ranges[2 * i + 1] - ranges[2 * i]))+ranges[2 * i]
+    data = data.astype(np.float32)
+    return data
+
+def rescale_data(data,ranges):
     for i in range(int(len(ranges)/2)):
        data[:, i] = (data[:, i] * (ranges[2 * i + 1] - ranges[2 * i]))+ranges[2 * i]
     data = data.astype(np.float32)
