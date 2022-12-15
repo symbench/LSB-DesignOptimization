@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 #from lp import load_N_predict
 import shutil
 
-from ./arch/en_dec import *
+from ./architecture/en_dec import *
 
 a_l=100; a_h=500;
 b_l=70; b_h=300;
