@@ -60,15 +60,19 @@ class VAE(nn.Module):
     def __init__(self):
         super(VAE, self).__init__()
 
-        self.fc1 = nn.Linear(3, 400)
-        self.fc21 = nn.Linear(400, 2)
-        self.fc22 = nn.Linear(400, 2)
-        self.fc3 = nn.Linear(2, 400)
-        self.fc4 = nn.Linear(400, 3)
+        self.fc1 = nn.Linear(3, 128)
+        self.fc2 = nn.Linear(128, 256)
+        self.fc3 = nn.Linear(256, 512)
+        self.fc41 = nn.Linear(512, 2)
+        self.fc42 = nn.Linear(512, 2)
+        self.fc5 = nn.Linear(2, 512)
+        self.fc6 = nn.Linear(512,256)
+        self.fc7 = nn.Linear(256,128)
+        self.fc8 = nn.Linear(128, 3)
 
     def encode(self, x):
-        h1 = F.relu(self.fc1(x))
-        return self.fc21(h1), self.fc22(h1)
+        h1 = F.relu(self.fc3(F.relu(self.fc2(F.relu(self.fc1(x))))))
+        return self.fc41(h1), self.fc42(h1)
 
     def reparametrize(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
@@ -80,8 +84,8 @@ class VAE(nn.Module):
         return eps.mul(std).add_(mu)
 
     def decode(self, z):
-        h3 = F.relu(self.fc3(z))
-        return self.fc4(h3)
+        h3 = F.relu(self.fc7(F.relu(self.fc6(F.relu(self.fc5(z))))))  
+        return F.sigmoid(self.fc8(h3))
 
     def forward(self, x):
         mu, logvar = self.encode(x)
@@ -93,7 +97,7 @@ model = VAE()
 if device=='cuda':
     model.cuda()
 
-reconstruction_function = nn.MSELoss(size_average=False)
+reconstruction_function = nn.L1Loss(size_average=False)
 
 
 def loss_function(recon_x, x, mu, logvar):
@@ -105,7 +109,7 @@ def loss_function(recon_x, x, mu, logvar):
     return BCE + KLD
 
 
-optimizer = optim.Adam(model.parameters(), lr=1e-3)
+optimizer = optim.Adam(model.parameters(), lr=0.01)
 
 for epoch in range(num_epochs):
     print('epoch is:',epoch)
