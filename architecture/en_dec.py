@@ -29,3 +29,6 @@ class decoder(nn.Module):
     def forward(self, x):
         x = self.decoder(x)
         return x
+
+if __name__=="__main__": 
+   pass
