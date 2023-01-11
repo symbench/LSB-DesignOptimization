@@ -81,7 +81,7 @@ class VAE(nn.Module):
 
     def decode(self, z):
         h3 = F.relu(self.fc3(z))
-        return F.sigmoid(self.fc4(h3))
+        return self.fc4(h3)
 
     def forward(self, x):
         mu, logvar = self.encode(x)
@@ -144,4 +144,27 @@ torch.save(model.state_dict(), './vae.pt')
 
 
 # write sample from normal dist 
+samples= torch.from_numpy(np.random.rand(100,2).astype(float) )
+print(samples.dtype)
+output= model.decode(samples.float())
+print('Samples are:',samples)
+
+output=output.cpu().detach().numpy()
+#estimate_accuracy(test_data,output)
+output=rescale_data(output,ranges)
+print('Reconstructed Output is:',output)
+
 # checker function to ensure the generated data is within the bound ( take it from earlier RRCF work) 
+min=[a_l,b_l,c_l]; max=[a_h,b_h,c_h]
+def check_bound_samples(data,box):
+    print('data',data,'box',box)
+    print('box 0 is',box[0],'box[1] is',box[1])
+    data=np.where((box[0].reshape(-1,1)-data) >0, -100000, data)
+    #data=np.where((0-data>0,0,data))
+    print('min ceiled data is:',data)
+    data=np.where((data-box[1].reshape(-1,1)) >0, -100000, data)
+    print('new data is:',data)
+    
+def create_bound_box(min,max,samples): 
+    return np.concatenate((np.full((1,samples), min),np.full((1,samples),max)),axis=0)
+
