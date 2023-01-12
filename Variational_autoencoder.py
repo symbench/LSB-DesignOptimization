@@ -22,7 +22,7 @@ b_l=70; b_h=300;
 c_l=70; c_h=300;
 #r_l=100; r_h=750;
 #v_l=0.5;v_h=5;
-n=1000
+n=20000
 dim=3
 ranges=[a_l,a_h,b_l,b_h,c_l,c_h]             
 
@@ -32,7 +32,7 @@ output_size=dim
 
 
 device='cpu'
-num_epochs = 20000
+num_epochs = 500
 batch_size = 64
 learning_rate = 1e-3
 _data= gen_test_data(n,dim,ranges)
@@ -98,7 +98,7 @@ if device=='cuda':
     model.cuda()
 
 reconstruction_function = nn.L1Loss(size_average=False)
-
+#reconstruction_function = nn.MSELoss(size_average=False)
 
 def loss_function(recon_x, x, mu, logvar):
     BCE = reconstruction_function(recon_x, x)  # mse loss
@@ -148,16 +148,38 @@ plt.show()
 torch.save(model.state_dict(), './vae.pt')
 
 
+def plot3D_data(X,title):
+   image_name= './images/'+title+'.png'
+
+   from mpl_toolkits.mplot3d import Axes3D
+   Axes3D = Axes3D  # pycharm auto import
+   fig = plt.figure()
+   ax = fig.add_subplot(111, projection='3d')
+   ax.scatter(X[:,0], X[:,1], X[:,2])
+   plt.title(title)
+   plt.savefig(image_name)
+
+
+
+
+
+# load the model, sample and regenerate space
+
+# plot input and output space and compare
+
 # write sample from normal dist 
-samples= torch.from_numpy(np.random.rand(100,2).astype(float) )
-print(samples.dtype)
+samples= torch.from_numpy(np.random.rand(n,2).astype(float) )
+#print(samples.dtype)
 output= model.decode(samples.float())
-print('Samples are:',samples)
+#print('Samples are:',samples)
 
 output=output.cpu().detach().numpy()
 #estimate_accuracy(test_data,output)
 output=rescale_data(output,ranges)
-print('Reconstructed Output is:',output)
+#print('Reconstructed Output is:',output)
+
+plot3D_data(_data,'input_space')
+plot3D_data(output,'output_space')
 
 # checker function to ensure the generated data is within the bound ( take it from earlier RRCF work) 
 min=[a_l,b_l,c_l]; max=[a_h,b_h,c_h]
