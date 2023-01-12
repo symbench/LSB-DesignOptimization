@@ -22,7 +22,7 @@ b_l=70; b_h=300;
 c_l=70; c_h=300;
 #r_l=100; r_h=750;
 #v_l=0.5;v_h=5;
-n=20000
+n=1000
 dim=3
 ranges=[a_l,a_h,b_l,b_h,c_l,c_h]             
 
@@ -32,8 +32,8 @@ output_size=dim
 
 
 device='cpu'
-num_epochs = 500
-batch_size = 128
+num_epochs = 20000
+batch_size = 64
 learning_rate = 1e-3
 _data= gen_test_data(n,dim,ranges)
 print('_data shape:',_data.shape)
@@ -102,6 +102,7 @@ reconstruction_function = nn.L1Loss(size_average=False)
 
 def loss_function(recon_x, x, mu, logvar):
     BCE = reconstruction_function(recon_x, x)  # mse loss
+    BCE *=3*3
     # loss = 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
     KLD_element = mu.pow(2).add_(logvar.exp()).mul_(-1).add_(1).add_(logvar)
     KLD = torch.sum(KLD_element).mul_(-0.5)
@@ -109,7 +110,7 @@ def loss_function(recon_x, x, mu, logvar):
     return BCE + KLD
 
 
-optimizer = optim.Adam(model.parameters(), lr=0.01)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 for epoch in range(num_epochs):
     print('epoch is:',epoch)
@@ -121,12 +122,12 @@ for epoch in range(num_epochs):
                 dataloader = DataLoader(train_data, batch_size, True)
                 correct = 0
                 for x,_ in dataloader:
-                	#print(x)
-                	x= x.to(device) 
-                	recon_batch, mu, logvar = model(x)
-                	loss = loss_function(recon_batch,x, mu, logvar)
-
+                	#print('x is:',x) 
+                	x = Variable(x)
+                	x= x.to(device)
                 	optimizer.zero_grad(); 
+                	recon_batch, mu, logvar = model(x); #print('recon batch:',recon_batch)
+                	loss = loss_function(recon_batch,x, mu, logvar)
                 	loss.backward() 
                 	optimizer.step();
                 	correct+= loss.item()
